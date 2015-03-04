@@ -29,7 +29,7 @@ MAINTAINER Dave Morris <docker-admin@metagrid.co.uk>
 ENV DEBIAN_FRONTEND noninteractive
 
 #
-# Install our build tools.
+# Install our C build tools.
 RUN apt-get update && apt-get -yq install \
     zip \
     make \
