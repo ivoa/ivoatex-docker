@@ -1,8 +1,6 @@
 # ivoatex
 Docker container to build [IvoaTex](http://www.ivoa.net/documents/Notes/IVOATex/index.html) documents.
 
-Based on [metagrid/notroot-debian](/u/metagrid/notroot-debian).
-
 To run the container :
 
     docker run -it \
