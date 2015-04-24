@@ -5,7 +5,7 @@ To run the container :
 
     docker run -it \
         -e "useruid=$(id -u)" \
-        -v "${document}:/var/local/texdata" \
+        -v "$(pwd):/var/local/texdata" \
         ivoa/ivoatex
 
 To build the document :
