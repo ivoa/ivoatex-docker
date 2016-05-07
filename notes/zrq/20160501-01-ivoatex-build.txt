@@ -1,0 +1,73 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2016, ROE (http://www.roe.ac.uk/)
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#  
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+#
+
+# -----------------------------------------------------
+# Create our settings for the ivoatex build.
+#[user@desktop]
+
+    if [ ! -e "${HOME:?}/ivoatex.settings" ]
+    then
+        cat > "${HOME:?}/ivoatex.settings" << EOF
+IVOATEXT_HOME=/var/local/projects/edinburgh/ivoatex
+IVOATEXT_CODE=\${IVOATEXT_HOME:?}/github
+EOF
+    fi
+
+# -----------------------------------------------------
+# Create our settings for the ADQL document.
+#[user@desktop]
+
+    if [ ! -e "${HOME:?}/adqltex.settings" ]
+    then
+        cat > "${HOME:?}/adqltex.settings" << EOF
+EOF
+VOLUTE_HOME=/var/local/projects/edinburgh/volute/svn
+ADQLTEXT_CODE=\${VOLUTE_HOME:?}/ADQL
+    fi
+    
+# -----------------------------------------------------
+# Remove existing containers and images.
+#[user@desktop]
+
+    docker rm -v $(docker stop $(docker ps -aq))
+
+    docker rmi -f $(docker images -q)
+
+# -----------------------------------------------------
+# Build our container images.
+#[user@desktop]
+
+    source "${HOME:?}/ivoatex.settings"
+    pushd "${IVOATEXT_CODE:?}"
+
+        docker build \
+            --tag "ivoa/ivoatex:1.1" \
+                docker
+
+    popd
+
+# -----------------------------------------------------
+# Push our container images.
+#[user@desktop]
+
+
+
