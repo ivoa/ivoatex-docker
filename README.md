@@ -1,14 +1,14 @@
 # ivoatex
 Docker container to build [IvoaTex](http://www.ivoa.net/documents/Notes/IVOATex/index.html) documents.
 
-To run the container :
+Run the container in the target document directory:
 
-    docker run -it \
+    docker run -it --rm \
         -e "useruid=$(id -u)" \
         -v "$(pwd):/var/local/texdata" \
         ivoa/ivoatex
 
-To build the document :
+Run make inside the container to build the document:
 
     pushd /var/local/texdata
 
