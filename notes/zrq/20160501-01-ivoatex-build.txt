@@ -33,26 +33,6 @@ EOF
     fi
 
 # -----------------------------------------------------
-# Create our settings for the ADQL document.
-#[user@desktop]
-
-    if [ ! -e "${HOME:?}/adqltex.settings" ]
-    then
-        cat > "${HOME:?}/adqltex.settings" << EOF
-EOF
-VOLUTE_HOME=/var/local/projects/edinburgh/volute/svn
-ADQLTEXT_CODE=\${VOLUTE_HOME:?}/ADQL
-    fi
-    
-# -----------------------------------------------------
-# Remove existing containers and images.
-#[user@desktop]
-
-    docker rm -v $(docker stop $(docker ps -aq))
-
-    docker rmi -f $(docker images -q)
-
-# -----------------------------------------------------
 # Build our container images.
 #[user@desktop]
 
@@ -69,5 +49,6 @@ ADQLTEXT_CODE=\${VOLUTE_HOME:?}/ADQL
 # Push our container images.
 #[user@desktop]
 
-
+    ....
+    
 
