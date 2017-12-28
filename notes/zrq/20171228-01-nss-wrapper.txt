@@ -1,7 +1,7 @@
 #
 # <meta:header>
 #   <meta:licence>
-#     Copyright (c) 2016, ROE (http://www.roe.ac.uk/)
+#     Copyright (c) 2017, ROE (http://www.roe.ac.uk/)
 #
 #     This information is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
@@ -20,35 +20,21 @@
 #
 #
 
-# -----------------------------------------------------
-# Create our settings for the ivoatex build.
-#[user@desktop]
 
-    if [ ! -e "${HOME:?}/ivoatex.settings" ]
-    then
-        cat > "${HOME:?}/ivoatex.settings" << EOF
-IVOATEXT_HOME=/var/local/projects/edinburgh/ivoatex
-IVOATEXT_CODE=\${IVOATEXT_HOME:?}/github
-EOF
-    fi
+    #
+    # Adapting to cope with random user ID.
+    http://blog.dscpl.com.au/2015/12/random-user-ids-when-running-docker.html
 
-# -----------------------------------------------------
-# Build our container images.
-#[user@desktop]
+    #
+    # Using nss-wrapper to map unknown user IDs.
+    http://blog.dscpl.com.au/2015/12/unknown-user-when-running-docker.html
+    https://packages.debian.org/stretch/libnss-wrapper
 
-    source "${HOME:?}/ivoatex.settings"
-    pushd "${IVOATEXT_CODE:?}"
-
-        docker build \
-            --tag "ivoa/ivoatex:1.2" \
-                docker
-
-    popd
-
-# -----------------------------------------------------
-# Push our container images.
-#[user@desktop]
-
-    ....
-    
+    #
+    # Using user namespaces.
+    https://docs.docker.com/engine/security/userns-remap/
+    https://coderwall.com/p/s_ydlq/using-user-namespaces-on-docker
+    https://integratedcode.us/2015/10/13/user-namespaces-have-arrived-in-docker/
+    https://integratedcode.us/2016/02/05/docker-1-10-security-userns/
+    https://blog.docker.com/2016/02/docker-engine-1-10-security/
 

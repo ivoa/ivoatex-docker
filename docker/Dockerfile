@@ -21,7 +21,7 @@
 
 #
 # Docker container to run the IvoaTex build environment. 
-FROM metagrid/notroot-debian
+FROM debian:stretch-slim
 MAINTAINER Dave Morris <docker-admin@metagrid.co.uk>
 
 #
@@ -29,15 +29,19 @@ MAINTAINER Dave Morris <docker-admin@metagrid.co.uk>
 ENV DEBIAN_FRONTEND noninteractive
 
 #
-# Install our C build tools.
+# Install generic dev tools.
 RUN apt-get update && apt-get -yq install \
     zip \
-    make \
+    make
+
+#
+# Install C compiler.
+RUN apt-get update && apt-get -yq install \
     gcc \
     libc-dev
 
 #
-# Install our HTML tools
+# Install XML/HTML tools
 RUN apt-get update && apt-get -yq install \
     xsltproc \
     libxml2-utils \
@@ -45,7 +49,7 @@ RUN apt-get update && apt-get -yq install \
     ghostscript
 
 #
-# Install our LaTex tools.
+# Install LaTex tools.
 RUN apt-get update && apt-get -yq install \
     texlive-latex-base \
     texlive-latex-extra \
@@ -55,12 +59,8 @@ RUN apt-get update && apt-get -yq install \
     cm-super
 
 #
-# Set our username and home directory.
-ENV username texuser
-ENV userhome /var/local/texdata
-
-#
-# Make our working directory a data volume.
-VOLUME /var/local/texdata
+# Label working directory as a data volume.
+VOLUME  /texdata
+WORKDIR /texdata
 
 

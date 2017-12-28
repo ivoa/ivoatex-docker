@@ -1,7 +1,7 @@
 #
 # <meta:header>
 #   <meta:licence>
-#     Copyright (c) 2016, ROE (http://www.roe.ac.uk/)
+#     Copyright (c) 2017, ROE (http://www.roe.ac.uk/)
 #
 #     This information is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
@@ -20,8 +20,24 @@
 #
 #
 
+
+    #
+    # Updating the container to work with latest Docker.
+    # Remove dependency on notroot.
+
 # -----------------------------------------------------
-# Create our settings for the ivoatex build.
+# Apply settings for volute projects.
+#[user@desktop]
+
+    if [ ! -e "${HOME:?}/volute.settings" ]
+    then
+        cat > "${HOME:?}/volute.settings" << EOF
+VOLUTE_HOME=/var/local/projects/edinburgh/volute/svn
+EOF
+    fi
+    
+# -----------------------------------------------------
+# Apply settings for our ivoatex image.
 #[user@desktop]
 
     if [ ! -e "${HOME:?}/ivoatex.settings" ]
@@ -33,7 +49,7 @@ EOF
     fi
 
 # -----------------------------------------------------
-# Build our container images.
+# Build our container image.
 #[user@desktop]
 
     source "${HOME:?}/ivoatex.settings"
@@ -46,9 +62,47 @@ EOF
     popd
 
 # -----------------------------------------------------
-# Push our container images.
+# Test our image.
 #[user@desktop]
 
-    ....
-    
+    source "${HOME:?}/volute.settings"
+    pushd "${VOLUTE_HOME:?}/ADQL"
+
+        docker run \
+            --rm  --tty \
+            --interactive \
+            --user "$(id -u):$(id -g)" \
+            --volume "$(pwd):/texdata" \
+            ivoa/ivoatex:1.2
+
+            make archdiag.pdf
+
+            make clean
+            make biblio 
+            make biblio
+
+            make pdf
+            make html
+            make zip
+
+# -----------------------------------------------------
+# Unknown float option.
+# https://tex.stackexchange.com/questions/275456/latex-error-unknown-float-option
+#[user@desktop]
+
+    LaTeX Error: Unknown float option `m'.
+
+    -   \begin{table}[th]\footnotesize
+    +   \begin{table}[thm]\footnotesize
+
+
+# -----------------------------------------------------
+# Upload our image.
+#[user@desktop]
+
+
+
+
+
+
 
