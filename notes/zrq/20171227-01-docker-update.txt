@@ -97,8 +97,43 @@ EOF
 
 
 # -----------------------------------------------------
+# Check our image tree.
+#[user@desktop]
+
+    docker run \
+        --rm  --tty \
+        --interactive \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
+        nate/dockviz \
+            images --tree
+
+        └─<missing> Virtual Size: 55.2 MB
+          └─9a091084b515 Virtual Size: 55.2 MB Tags: debian:stretch-slim
+            └─ab0a0e901ca5 Virtual Size: 55.2 MB
+              └─6dea129ec8b5 Virtual Size: 55.2 MB
+                └─df56d8e34491 Virtual Size: 72.3 MB
+                  └─ef0b83133115 Virtual Size: 173.9 MB
+                    └─29936d61d6c5 Virtual Size: 312.4 MB
+                      └─4772b214827b Virtual Size: 916.1 MB
+                        └─11ed1b5cf5c0 Virtual Size: 916.1 MB
+                          └─df7fd5448f6d Virtual Size: 916.1 MB Tags: ivoa/ivoatex:1.2
+
+
+# -----------------------------------------------------
 # Upload our image.
 #[user@desktop]
+
+    source "${HOME:?}/secret.sh"
+
+    docker login \
+        --username $(secret docker.io.user) \
+        --password $(secret docker.io.pass)
+
+    docker push "ivoa/ivoatex:1.2"
+    docker push "ivoa/ivoatex:latest"
+
+
+
 
 
 
