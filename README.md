@@ -3,16 +3,17 @@ Docker container to build [IvoaTex](http://www.ivoa.net/documents/Notes/IVOATex/
 
 Run the container in the target document directory:
 
-    docker run -it --rm \
-        -e "useruid=$(id -u)" \
-        -v "$(pwd):/var/local/texdata" \
-        ivoa/ivoatex
+    docker run \
+        --rm  \
+        --tty \
+        --interactive \
+        --user "$(id -u):$(id -g)" \
+        --volume "$(pwd):/texdata" \
+        ivoa/ivoatex:1.2
 
 Run make inside the container to build the document:
 
-    pushd /var/local/texdata
-
-        make clean
-        make biblio
-        make
+    make clean
+    make biblio
+    make
 
