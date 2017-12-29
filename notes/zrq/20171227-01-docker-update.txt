@@ -69,7 +69,8 @@ EOF
     pushd "${VOLUTE_HOME:?}/ADQL"
 
         docker run \
-            --rm  --tty \
+            --rm  \
+            --tty \
             --interactive \
             --user "$(id -u):$(id -g)" \
             --volume "$(pwd):/texdata" \
@@ -101,7 +102,8 @@ EOF
 #[user@desktop]
 
     docker run \
-        --rm  --tty \
+        --rm  \
+        --tty \
         --interactive \
         --volume /var/run/docker.sock:/var/run/docker.sock \
         nate/dockviz \
@@ -124,6 +126,8 @@ EOF
 #[user@desktop]
 
     source "${HOME:?}/secret.sh"
+
+    docker tag "ivoa/ivoatex:1.2" "ivoa/ivoatex:latest"
 
     docker login \
         --username $(secret docker.io.user) \
