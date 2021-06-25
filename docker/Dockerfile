@@ -12,7 +12,7 @@
 #     but WITHOUT ANY WARRANTY; without even the implied warranty of
 #     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #     GNU General Public License for more details.
-#  
+#
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   </meta:licence>
@@ -20,47 +20,40 @@
 #
 
 #
-# Docker container to run the IvoaTex build environment. 
-FROM debian:stretch-slim
+# Docker container to run the IvoaTex build environment.
+
+ARG osversion
+
+FROM ${osversion}
 MAINTAINER Dave Morris <docker-admin@metagrid.co.uk>
+
+ARG builddate
+ARG buildtime
+
+LABEL maintainer="Dave Morris <docker-admin@metagrid.co.uk>"
+LABEL builddate="${builddate}"
+LABEL buildtime="${buildtime}"
+LABEL gitrepo="https://github.com/ivoa/ivoa"
 
 #
 # Disable interactive install.
 ENV DEBIAN_FRONTEND noninteractive
 
-#
-# Install generic dev tools.
-RUN apt-get update && apt-get -yq install \
-    zip \
-    make
-
-#
-# Install C compiler.
-RUN apt-get update && apt-get -yq install \
-    gcc \
-    libc-dev
-
-#
-# Install XML/HTML tools
-RUN apt-get update && apt-get -yq install \
-    xsltproc \
-    libxml2-utils \
-    imagemagick \
-    ghostscript
-
-#
-# Install LaTex tools.
-RUN apt-get update && apt-get -yq install \
-    texlive-latex-base \
-    texlive-latex-extra \
-    texlive-bibtex-extra \
-    texlive-fonts-recommended \
-    latex-xcolor \
-    cm-super
+RUN apt-get update
+RUN apt-get install -y \
+        texlive-latex-extra \
+        texlive-bibtex-extra \
+        build-essential \
+        librsvg2-bin \
+        imagemagick \
+        ghostscript \
+        xsltproc \
+        cm-super \
+        zip
 
 #
 # Label working directory as a data volume.
-VOLUME  /texdata
-WORKDIR /texdata
+VOLUME  /document
+WORKDIR /document
 
 
