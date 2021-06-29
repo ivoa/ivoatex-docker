@@ -21,9 +21,7 @@
 
 #
 # Docker container to run the IvoaTex build environment.
-
 ARG osversion
-
 FROM ${osversion}
 MAINTAINER Dave Morris <docker-admin@metagrid.co.uk>
 
@@ -33,14 +31,15 @@ ARG buildtime
 LABEL maintainer="Dave Morris <docker-admin@metagrid.co.uk>"
 LABEL builddate="${builddate}"
 LABEL buildtime="${buildtime}"
-LABEL gitrepo="https://github.com/ivoa/ivoa"
+LABEL gitrepo="https://github.com/ivoa/ivoatex-docker"
 
 #
 # Disable interactive install.
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update
-RUN apt-get install -y \
+#
+# Install LaTex tools.
+RUN apt-get update && apt-get -yq install
         texlive-latex-extra \
         texlive-bibtex-extra \
         build-essential \
