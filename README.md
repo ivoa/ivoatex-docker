@@ -2,8 +2,7 @@
 Docker container to build [IvoaTex](http://www.ivoa.net/documents/Notes/IVOATex/index.html) documents.
 
 We recommend you use [Podman](https://podman.io/) to run IvoaTex as a [rootless-container](https://github.com/containers/podman#rootless).
-
-The advantage is that any user inside the container will map to your user uid on the host, avoiding problems with file ownership.
+The advantage is that any user inside the container will map to your `uid` on the host, avoiding problems with file ownership.
 
 Using Podman to build a document in the current directory:
 
