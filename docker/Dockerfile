@@ -21,8 +21,7 @@
 
 #
 # Docker container to run the IvoaTex build environment.
-ARG osversion
-FROM ${osversion}
+FROM docker.io/library/ubuntu:21.10
 MAINTAINER Dave Morris <docker-admin@metagrid.co.uk>
 
 ARG builddate
@@ -39,7 +38,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 #
 # Install LaTex tools.
-RUN apt-get update && apt-get -yq install
+RUN apt-get update && apt-get -yq install \
         texlive-latex-extra \
         texlive-bibtex-extra \
         build-essential \
