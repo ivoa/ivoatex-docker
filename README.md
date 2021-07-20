@@ -17,7 +17,6 @@ Using Podman to build a document in the current directory:
 
 Once inside the container, run the following commands to build the document:
 
-    cd /document
     make clean
     make biblio
     make forcetex
