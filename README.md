@@ -22,7 +22,7 @@ Once inside the container, run the following commands to build the document:
     make forcetex
 
 
-To do the same with Docker you need to specify the user `uid` and `gid` so that the resulting document owned by your account rather than by root.
+To do the same with Docker you need to specify the user `uid` and `gid` so that the resulting documents are owned by your account rather than by root.
 
     docker run \
         --rm  \
