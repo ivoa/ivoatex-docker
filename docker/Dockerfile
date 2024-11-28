@@ -21,16 +21,25 @@
 
 #
 # Docker container to run the IvoaTex build environment.
-FROM docker.io/library/ubuntu:21.10
-MAINTAINER Dave Morris <docker-admin@metagrid.co.uk>
+FROM docker.io/library/debian:12.8
 
 ARG builddate
 ARG buildtime
 
-LABEL maintainer="Dave Morris <docker-admin@metagrid.co.uk>"
-LABEL builddate="${builddate}"
-LABEL buildtime="${buildtime}"
-LABEL gitrepo="https://github.com/ivoa/ivoatex-docker"
+MAINTAINER Dave Morris <docker-admin@metagrid.co.uk>
+
+LABEL maintainer "Dave Morris <docker-admin@metagrid.co.uk>"
+LABEL buildtag   "${buildtag}"
+LABEL buildtime  "${buildtime}"
+LABEL vendor     "UK SKA Regional Centre (UKSRC)"
+LABEL version    "${buildtag}"
+LABEL license    "GPL-3.0-or-later"
+LABEL org.opencontainers.image.created  "${buildtime}"
+LABEL org.opencontainers.image.vendor   "UK SKA Regional Centre (UKSRC)"
+LABEL org.opencontainers.image.version  "${buildtag}"
+LABEL org.opencontainers.image.licenses "GPL-3.0-or-later"
+LABEL org.opencontainers.image.source   "https://github.com/ivoa/ivoatex-docker"
+LABEL org.opencontainers.image.authors  "https://github.com/Zarquan"
 
 #
 # Disable interactive install.
@@ -39,15 +48,17 @@ ENV DEBIAN_FRONTEND noninteractive
 #
 # Install LaTex tools.
 RUN apt-get update && apt-get -yq install \
-        texlive-latex-extra \
-        texlive-bibtex-extra \
-        build-essential \
-        librsvg2-bin \
-        imagemagick \
-        ghostscript \
-        xsltproc \
-        cm-super \
-        zip
+    build-essential \
+    cm-super \
+    ghostscript \
+    latexmk \
+    librsvg2-bin \
+    librsvg2-bin \
+    pdftk \
+    texlive-latex-extra \
+    texlive-bibtex-extra \
+    xsltproc \
+    zip
 
 #
 # Label working directory as a data volume.
