@@ -19,10 +19,10 @@ Once inside the container, run the following commands to build the document:
 
     make clean
     make biblio
-    make forcetex
+    make
 
 
-To do the same with Docker you need to specify the user `uid` and `gid` so that the resulting document owned by your account rather than by root.
+To do the same with Docker you need to specify the user `uid` and `gid` so that the resulting documents are owned by your account rather than by root.
 
     docker run \
         --rm  \
@@ -32,3 +32,6 @@ To do the same with Docker you need to specify the user `uid` and `gid` so that 
         --volume "${DOC_PATH:?}:/document:rw,Z" \
         ivoa/ivoatex:latest
 
+This project has received funding from the following sources :
+* The European Commission Framework Programme Horizon 2020 Research and Innovation action under grant agreement n°653477, [ASTERICS](https://cordis.europa.eu/project/id/653477)
+* The European Commission Framework Programme Horizon 2020 Research and Innovation action under grant agreement n°824064, [ESCAPE](https://cordis.europa.eu/project/id/824064)
