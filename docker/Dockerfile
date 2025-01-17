@@ -21,7 +21,7 @@
 
 #
 # Docker container to run the IvoaTex build environment.
-FROM docker.io/library/ubuntu:21.10
+FROM docker.io/library/ubuntu:25.04
 MAINTAINER Dave Morris <docker-admin@metagrid.co.uk>
 
 ARG builddate
@@ -47,7 +47,10 @@ RUN apt-get update && apt-get -yq install \
         ghostscript \
         xsltproc \
         cm-super \
-        zip
+        zip \
+        python3-requests \
+        nano \
+        latexmk
 
 #
 # Label working directory as a data volume.
