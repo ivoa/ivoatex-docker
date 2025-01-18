@@ -23,10 +23,9 @@
 # AIMetrics: []
 #
 
-
     Target:
 
-        Create a new version of the document builder.
+        Update to newer versions
 
     Result:
 
@@ -61,8 +60,15 @@ buildtime [${buildtime}]
 
 EOF
 
-    >   ....
-    >   ....
+    >   repohost  [ghcr.io]
+    >   repobase  [ivoa]
+    >   reponame  [ivoatex-docker]
+    >   repopath  [ghcr.io/ivoa]
+    >   
+    >   buildname [ivoatex-docker]
+    >   
+    >   builddate [2025.01.18]
+    >   buildtime [2025-01-18T05:32:09]
 
 
 # -----------------------------------------------------
@@ -89,21 +95,67 @@ EOF
     >   ....
     >   ....
     >   STEP 19/20: VOLUME  /document
-    >   --> e558a62e6ca6
+    >   --> 6473496b52b5
     >   STEP 20/20: WORKDIR /document
     >   COMMIT ivoatex-docker:latest
-    >   --> 28deca4eb7bc
-    >   Successfully tagged localhost/ivoatex-docker:2024.11.28
+    >   --> 6cc1ac7381b9
+    >   Successfully tagged localhost/ivoatex-docker:2025.01.18
     >   Successfully tagged localhost/ivoatex-docker:latest
-    >   28deca4eb7bc40e73a8c0db136cd784a647fe72cc28528a0b857a092dbdacbac
+    >   6cc1ac7381b962e90df75a790cd8f0a735bf09fee56c2f3bccecaf6219243491
 
 
     podman images
 
     >   REPOSITORY                TAG         IMAGE ID      CREATED         SIZE
-    >   localhost/ivoatex-docker  2024.11.28  28deca4eb7bc  30 seconds ago  2.18 GB
-    >   localhost/ivoatex-docker  latest      28deca4eb7bc  30 seconds ago  2.18 GB
-    >   docker.io/library/debian  12.8        63ba939a68fd  2 weeks ago     121 MB
+    >   localhost/ivoatex-docker  2025.01.18  6cc1ac7381b9  28 minutes ago  2.22 GB
+    >   localhost/ivoatex-docker  latest      6cc1ac7381b9  28 minutes ago  2.22 GB
+    >   docker.io/library/debian  12.9        30f245ccb05f  5 days ago      121 MB
+
+
+# -----------------------------------------------------
+# Check we have all the Python modules we need.
+# Test file created by grepping the ivoatex source for 'import'.
+# grep -r -e '^import' -e '^from' *.py | sed 's/.*:\(.*\)$/\1/' | sort | uniq
+#
+#[user@desktop]
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        ivoatex-docker:latest
+
+        pushd /tmp
+
+            mkdir test
+            pushd test
+
+cat > text.py << EOF
+#!/usr/bin/env python
+
+from io import StringIO
+from urllib import parse, request
+from xml.etree import ElementTree as etree
+import csv
+import datetime
+import json
+import os
+import pprint
+import re
+import request
+import subprocess
+import sys
+import tempfile
+import webbrowser
+
+print("Done")
+
+EOF
+
+    chmod a+x text.py
+    ./text.py
+
+
 
 
 # -----------------------------------------------------
@@ -130,7 +182,6 @@ EOF
         "${repopath}"
 
     >   Login Succeeded!
-
 
 
 # -----------------------------------------------------
@@ -160,12 +211,12 @@ EOF
 
     podman rmi -f $(podman images -aq)
 
+    >   ....
+    >   ....
 
 # -----------------------------------------------------
 # Test our image.
 #[user@desktop]
-
-    podman rmi -f $(podman mages -aq)
 
     source "${HOME:?}/execbroker.env"
     podman run \
@@ -175,6 +226,17 @@ EOF
         --name ivoatex \
         --volume "${EXECBROKER_CODE}:/document:rw,z" \
         "${repopath:?}/${buildname}:${builddate:?}"
+
+        make clean
+        make
+
+    >   ....
+    >   ....
+    >   Latexmk: Found bibliography file(s):
+    >     ./ivoatex/docrepo.bib
+    >     ./ivoatex/ivoabib.bib
+    >   Latexmk: All targets () are up-to-date
+
 
 
 
