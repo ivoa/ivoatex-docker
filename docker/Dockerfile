@@ -51,6 +51,7 @@ RUN apt-get update && apt-get -yq install \
     build-essential \
     cm-super \
     ghostscript \
+    git \
     latexmk \
     librsvg2-bin \
     librsvg2-bin \

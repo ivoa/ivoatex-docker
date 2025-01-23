@@ -25,7 +25,7 @@
 
     Target:
 
-        Update to newer versions
+        Add git to the dependencies.
 
     Result:
 
@@ -53,10 +53,9 @@ repobase  [${repobase}]
 reponame  [${reponame}]
 repopath  [${repopath}]
 
-buildname [${buildname}]
-
 builddate [${builddate}]
 buildtime [${buildtime}]
+buildname [${buildname}]
 
 EOF
 
@@ -64,11 +63,10 @@ EOF
     >   repobase  [ivoa]
     >   reponame  [ivoatex-docker]
     >   repopath  [ghcr.io/ivoa]
-    >
+    >   
+    >   builddate [2025.01.23]
+    >   buildtime [2025-01-23T18:33:31]
     >   buildname [ivoatex-docker]
-    >
-    >   builddate [2025.01.18]
-    >   buildtime [2025-01-18T05:32:09]
 
 
 # -----------------------------------------------------
@@ -94,29 +92,22 @@ EOF
 
     >   ....
     >   ....
-    >   STEP 19/20: VOLUME  /document
-    >   --> 6473496b52b5
-    >   STEP 20/20: WORKDIR /document
-    >   COMMIT ivoatex-docker:latest
-    >   --> 6cc1ac7381b9
-    >   Successfully tagged localhost/ivoatex-docker:2025.01.18
+    >   Successfully tagged localhost/ivoatex-docker:2025.01.23
     >   Successfully tagged localhost/ivoatex-docker:latest
-    >   6cc1ac7381b962e90df75a790cd8f0a735bf09fee56c2f3bccecaf6219243491
+    >   79aee13a6f0fc1a55d2efd43bcefaf88643fbdde4d3c7d7b76a530147827f540
 
 
     podman images
 
-    >   REPOSITORY                TAG         IMAGE ID      CREATED         SIZE
-    >   localhost/ivoatex-docker  2025.01.18  6cc1ac7381b9  28 minutes ago  2.22 GB
-    >   localhost/ivoatex-docker  latest      6cc1ac7381b9  28 minutes ago  2.22 GB
-    >   docker.io/library/debian  12.9        30f245ccb05f  5 days ago      121 MB
+    >   REPOSITORY                TAG         IMAGE ID      CREATED        SIZE
+    >   localhost/ivoatex-docker  2025.01.23  79aee13a6f0f  5 minutes ago  2.28 GB
+    >   localhost/ivoatex-docker  latest      79aee13a6f0f  5 minutes ago  2.28 GB
+    >   docker.io/library/debian  12.9        30f245ccb05f  10 days ago    121 MB
 
 
 # -----------------------------------------------------
-# Check we have all the Python modules we need.
-# Test file created by grepping the ivoatex source for 'import'.
-# grep -r -e '^import' -e '^from' *.py | sed 's/.*:\(.*\)$/\1/' | sort | uniq
-#
+# Check we can clone a GitHub repository using HTTP.
+# https://github.com/githubtraining/hellogitworld
 #[user@desktop]
 
     podman run \
@@ -125,37 +116,55 @@ EOF
         --interactive \
         "localhost/${buildname}:latest"
 
-        pushd /tmp
+            git clone https://github.com/ivoa/ivoatex-docker.git
 
-            mkdir test
-            pushd test
-
-cat > text.py << EOF
-#!/usr/bin/env python
-
-from io import StringIO
-from urllib import parse, request
-from xml.etree import ElementTree as etree
-import csv
-import datetime
-import json
-import os
-import pprint
-import re
-import request
-import subprocess
-import sys
-import tempfile
-import webbrowser
-
-print("Done")
-
-EOF
-
-    chmod a+x text.py
-    ./text.py
+    >   ....
+    >   ....
 
 
+# -----------------------------------------------------
+# Check we can access GitHub using ssh.
+# ** This assumes you have a Linux machine with an ssh-agent configured with your ssh private keys.
+# ** On a RedHat box you will also need to fix the SELinux constraints.
+# https://docs.github.com/en/authentication/connecting-to-github-with-ssh/testing-your-ssh-connection
+#[user@desktop]
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        --env "SSH_AUTH_SOCK=/mnt/ssh_auth_sock" \
+        --volume "${SSH_AUTH_SOCK:?}:/mnt/ssh_auth_sock:rw,Z" \
+        "localhost/${buildname}:latest"
+
+            ssh -T git@github.com
+
+    >   Hi Zarquan! You've successfully authenticated, but GitHub does not provide shell access.
+
+
+# -----------------------------------------------------
+# Check we can clone a GitHub repository using ssh.
+# ** This assumes you have a Linux machine with an ssh-agent configured with your ssh private keys.
+# ** On a RedHat box you will also need to fix the SELinux constraints.
+# https://github.com/githubtraining/hellogitworld
+#[user@desktop]
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        --env "SSH_AUTH_SOCK=/mnt/ssh_auth_sock" \
+        --volume "${SSH_AUTH_SOCK:?}:/mnt/ssh_auth_sock:rw,Z" \
+        "localhost/${buildname}:latest"
+
+            git clone git@github.com:ivoa/ivoatex-docker.git
+
+
+    >   Cloning into 'ivoatex-docker'...
+    >   ....
+    >   ....
+    >   Receiving objects: 100% (80/80), 28.78 KiB | 387.00 KiB/s, done.
+    >   Resolving deltas: 100% (27/27), done.
 
 
 # -----------------------------------------------------
@@ -192,16 +201,22 @@ EOF
         "localhost/${buildname}:${builddate:?}" \
         "${repopath:?}/${buildname}:${builddate:?}"
 
-    >   ....
-    >   ....
+    >   Getting image source signatures
+    >   Copying blob 3deb5785aeb8 done   |
+    >   Copying blob 4d2452b0de01 skipped: already exists
+    >   Copying config 79aee13a6f done   |
+    >   Writing manifest to image destination
 
 
     podman push \
         "localhost/${buildname}:${builddate:?}" \
         "${repopath:?}/${buildname}:latest"
 
-    >   ....
-    >   ....
+    >   Getting image source signatures
+    >   Copying blob f5cea28a1e9d skipped: already exists
+    >   Copying blob 4d2452b0de01 skipped: already exists
+    >   Copying config 79aee13a6f done   |
+    >   Writing manifest to image destination
 
 
 # -----------------------------------------------------
@@ -218,25 +233,38 @@ EOF
 # Test our image.
 #[user@desktop]
 
-    source "${HOME:?}/execbroker.env"
+    DOC_PATH=...
+
     podman run \
         --rm \
         --tty \
         --interactive \
         --name ivoatex \
-        --volume "${EXECBROKER_CODE}:/document:rw,z" \
+        --volume "${DOC_PATH}:/document:rw,z" \
         "${repopath:?}/${buildname}:${builddate:?}"
+
+    >   Trying to pull ghcr.io/ivoa/ivoatex-docker:2025.01.23...
+    >   Getting image source signatures
+    >   Copying blob f5cea28a1e9d done   |
+    >   Copying blob 4d2452b0de01 done   |
+    >   Copying config 79aee13a6f done   |
+    >   Writing manifest to image destination
+
 
         make clean
         make
 
     >   ....
     >   ....
+    >   Output written on ExecutionBroker.pdf (59 pages, 564425 bytes).
+    >   Transcript written on ExecutionBroker.log.
+    >   Latexmk: Getting log file 'ExecutionBroker.log'
+    >   Latexmk: Examining 'ExecutionBroker.fls'
+    >   Latexmk: Examining 'ExecutionBroker.log'
+    >   Latexmk: Found input bbl file 'ExecutionBroker.bbl'
+    >   Latexmk: Log file says output to 'ExecutionBroker.pdf'
     >   Latexmk: Found bibliography file(s):
     >     ./ivoatex/docrepo.bib
     >     ./ivoatex/ivoabib.bib
     >   Latexmk: All targets () are up-to-date
-
-
-
 
