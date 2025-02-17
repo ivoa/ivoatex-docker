@@ -1,0 +1,242 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2024, Manchester (http://www.manchester.ac.uk/)
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+#zrq-notes-indent
+#
+# AIMetrics: []
+#
+
+    Target:
+
+        Update to newer versions
+
+    Result:
+
+        Work in progress ...
+
+
+# -----------------------------------------------------
+# Set the build date and repository name.
+#[user@desktop]
+
+    repohost="ghcr.io"
+    repobase="ivoa"
+    reponame="ivoatex-docker"
+    repopath="${repohost}/${repobase}"
+
+    buildtag=$(date '+%Y.%m.%d')
+    builddate=$(date '+%Y.%m.%d')
+    buildtime=$(date '+%Y-%m-%dT%H:%M:%S')
+    buildname="ivoatex-docker"
+
+cat << EOF
+
+repohost  [${repohost}]
+repobase  [${repobase}]
+reponame  [${reponame}]
+repopath  [${repopath}]
+
+buildname [${buildname}]
+
+builddate [${builddate}]
+buildtime [${buildtime}]
+
+EOF
+
+    >   repohost  [ghcr.io]
+    >   repobase  [ivoa]
+    >   reponame  [ivoatex-docker]
+    >   repopath  [ghcr.io/ivoa]
+    >
+    >   buildname [ivoatex-docker]
+    >
+    >   builddate [2025.01.18]
+    >   buildtime [2025-01-18T05:32:09]
+
+
+# -----------------------------------------------------
+# Clear our image cache.
+#[user@desktop]
+
+    podman rmi -f $(podman images -aq)
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Build our container.
+#[user@desktop]
+
+    podman build \
+        --build-arg "builddate=${builddate:?}" \
+        --build-arg "buildtime=${buildtime:?}" \
+        --tag "${buildname}:latest" \
+        --tag "${buildname}:${builddate:?}" \
+        docker
+
+    >   ....
+    >   ....
+    >   STEP 19/20: VOLUME  /document
+    >   --> 6473496b52b5
+    >   STEP 20/20: WORKDIR /document
+    >   COMMIT ivoatex-docker:latest
+    >   --> 6cc1ac7381b9
+    >   Successfully tagged localhost/ivoatex-docker:2025.01.18
+    >   Successfully tagged localhost/ivoatex-docker:latest
+    >   6cc1ac7381b962e90df75a790cd8f0a735bf09fee56c2f3bccecaf6219243491
+
+
+    podman images
+
+    >   REPOSITORY                TAG         IMAGE ID      CREATED         SIZE
+    >   localhost/ivoatex-docker  2025.01.18  6cc1ac7381b9  28 minutes ago  2.22 GB
+    >   localhost/ivoatex-docker  latest      6cc1ac7381b9  28 minutes ago  2.22 GB
+    >   docker.io/library/debian  12.9        30f245ccb05f  5 days ago      121 MB
+
+
+# -----------------------------------------------------
+# Check we have all the Python modules we need.
+# Test file created by grepping the ivoatex source for 'import'.
+# grep -r -e '^import' -e '^from' *.py | sed 's/.*:\(.*\)$/\1/' | sort | uniq
+#
+#[user@desktop]
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        "localhost/${buildname}:latest"
+
+        pushd /tmp
+
+            mkdir test
+            pushd test
+
+cat > text.py << EOF
+#!/usr/bin/env python
+
+from io import StringIO
+from urllib import parse, request
+from xml.etree import ElementTree as etree
+import csv
+import datetime
+import json
+import os
+import pprint
+import re
+import request
+import subprocess
+import sys
+import tempfile
+import webbrowser
+
+print("Done")
+
+EOF
+
+    chmod a+x text.py
+    ./text.py
+
+
+
+
+# -----------------------------------------------------
+# Check our secret function works.
+#[user@desktop]
+
+    getsecret example.frog
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Login to the Docker registry.
+#[user@desktop]
+
+    guser=$(getsecret 'devops.ghcrio.user')
+    gpass=$(getsecret 'devops.ghcrio.pass')
+
+    echo "${gpass:?}" \
+    | podman login \
+        --password-stdin \
+        --username "${guser:?}" \
+        "${repopath}"
+
+    >   Login Succeeded!
+
+
+# -----------------------------------------------------
+# Push our image to our GitHub repository.
+#[user@desktop]
+
+    podman push \
+        "localhost/${buildname}:${builddate:?}" \
+        "${repopath:?}/${buildname}:${builddate:?}"
+
+    >   ....
+    >   ....
+
+
+    podman push \
+        "localhost/${buildname}:${builddate:?}" \
+        "${repopath:?}/${buildname}:latest"
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# -----------------------------------------------------
+# Clear our image cache.
+#[user@desktop]
+
+    podman rmi -f $(podman images -aq)
+
+    >   ....
+    >   ....
+
+# -----------------------------------------------------
+# Test our image.
+#[user@desktop]
+
+    source "${HOME:?}/execbroker.env"
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        --name ivoatex \
+        --volume "${EXECBROKER_CODE}:/document:rw,z" \
+        "${repopath:?}/${buildname}:${builddate:?}"
+
+        make clean
+        make
+
+    >   ....
+    >   ....
+    >   Latexmk: Found bibliography file(s):
+    >     ./ivoatex/docrepo.bib
+    >     ./ivoatex/ivoabib.bib
+    >   Latexmk: All targets () are up-to-date
+
+
+
+

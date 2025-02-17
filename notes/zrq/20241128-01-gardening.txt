@@ -1,0 +1,180 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2024, Manchester (http://www.manchester.ac.uk/)
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+#zrq-notes-indent
+#
+# AIMetrics: []
+#
+
+
+    Target:
+
+        Create a new version of the document builder.
+
+    Result:
+
+        Work in progress ...
+
+
+# -----------------------------------------------------
+# Set the build date and repository name.
+#[user@desktop]
+
+    repohost="ghcr.io"
+    repobase="ivoa"
+    reponame="ivoatex-docker"
+    repopath="${repohost}/${repobase}"
+
+    buildtag=$(date '+%Y.%m.%d')
+    builddate=$(date '+%Y.%m.%d')
+    buildtime=$(date '+%Y-%m-%dT%H:%M:%S')
+    buildname="ivoatex-docker"
+
+cat << EOF
+
+repohost  [${repohost}]
+repobase  [${repobase}]
+reponame  [${reponame}]
+repopath  [${repopath}]
+
+buildname [${buildname}]
+
+builddate [${builddate}]
+buildtime [${buildtime}]
+
+EOF
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Clear our image cache.
+#[user@desktop]
+
+    podman rmi -f $(podman images -aq)
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Build our container.
+#[user@desktop]
+
+    podman build \
+        --build-arg "builddate=${builddate:?}" \
+        --build-arg "buildtime=${buildtime:?}" \
+        --tag "${buildname}:latest" \
+        --tag "${buildname}:${builddate:?}" \
+        docker
+
+    >   ....
+    >   ....
+    >   STEP 19/20: VOLUME  /document
+    >   --> e558a62e6ca6
+    >   STEP 20/20: WORKDIR /document
+    >   COMMIT ivoatex-docker:latest
+    >   --> 28deca4eb7bc
+    >   Successfully tagged localhost/ivoatex-docker:2024.11.28
+    >   Successfully tagged localhost/ivoatex-docker:latest
+    >   28deca4eb7bc40e73a8c0db136cd784a647fe72cc28528a0b857a092dbdacbac
+
+
+    podman images
+
+    >   REPOSITORY                TAG         IMAGE ID      CREATED         SIZE
+    >   localhost/ivoatex-docker  2024.11.28  28deca4eb7bc  30 seconds ago  2.18 GB
+    >   localhost/ivoatex-docker  latest      28deca4eb7bc  30 seconds ago  2.18 GB
+    >   docker.io/library/debian  12.8        63ba939a68fd  2 weeks ago     121 MB
+
+
+# -----------------------------------------------------
+# Check our secret function works.
+#[user@desktop]
+
+    getsecret example.frog
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Login to the Docker registry.
+#[user@desktop]
+
+    guser=$(getsecret 'devops.ghcrio.user')
+    gpass=$(getsecret 'devops.ghcrio.pass')
+
+    echo "${gpass:?}" \
+    | podman login \
+        --password-stdin \
+        --username "${guser:?}" \
+        "${repopath}"
+
+    >   Login Succeeded!
+
+
+
+# -----------------------------------------------------
+# Push our image to our GitHub repository.
+#[user@desktop]
+
+    podman push \
+        "localhost/${buildname}:${builddate:?}" \
+        "${repopath:?}/${buildname}:${builddate:?}"
+
+    >   ....
+    >   ....
+
+
+    podman push \
+        "localhost/${buildname}:${builddate:?}" \
+        "${repopath:?}/${buildname}:latest"
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# -----------------------------------------------------
+# Clear our image cache.
+#[user@desktop]
+
+    podman rmi -f $(podman images -aq)
+
+
+# -----------------------------------------------------
+# Test our image.
+#[user@desktop]
+
+    podman rmi -f $(podman mages -aq)
+
+    source "${HOME:?}/execbroker.env"
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        --name ivoatex \
+        --volume "${EXECBROKER_CODE}:/document:rw,z" \
+        "${repopath:?}/${buildname}:${builddate:?}"
+
+
+

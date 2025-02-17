@@ -1,0 +1,270 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2024, Manchester (http://www.manchester.ac.uk/)
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+#zrq-notes-indent
+#
+# AIMetrics: []
+#
+
+    Target:
+
+        Add git to the dependencies.
+
+    Result:
+
+        Work in progress ...
+
+
+# -----------------------------------------------------
+# Set the build date and repository name.
+#[user@desktop]
+
+    repohost="ghcr.io"
+    repobase="ivoa"
+    reponame="ivoatex-docker"
+    repopath="${repohost}/${repobase}"
+
+    buildtag=$(date '+%Y.%m.%d')
+    builddate=$(date '+%Y.%m.%d')
+    buildtime=$(date '+%Y-%m-%dT%H:%M:%S')
+    buildname="ivoatex-docker"
+
+cat << EOF
+
+repohost  [${repohost}]
+repobase  [${repobase}]
+reponame  [${reponame}]
+repopath  [${repopath}]
+
+builddate [${builddate}]
+buildtime [${buildtime}]
+buildname [${buildname}]
+
+EOF
+
+    >   repohost  [ghcr.io]
+    >   repobase  [ivoa]
+    >   reponame  [ivoatex-docker]
+    >   repopath  [ghcr.io/ivoa]
+    >   
+    >   builddate [2025.01.23]
+    >   buildtime [2025-01-23T18:33:31]
+    >   buildname [ivoatex-docker]
+
+
+# -----------------------------------------------------
+# Clear our image cache.
+#[user@desktop]
+
+    podman rmi -f $(podman images -aq)
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Build our container.
+#[user@desktop]
+
+    podman build \
+        --build-arg "builddate=${builddate:?}" \
+        --build-arg "buildtime=${buildtime:?}" \
+        --tag "${buildname}:latest" \
+        --tag "${buildname}:${builddate:?}" \
+        docker
+
+    >   ....
+    >   ....
+    >   Successfully tagged localhost/ivoatex-docker:2025.01.23
+    >   Successfully tagged localhost/ivoatex-docker:latest
+    >   79aee13a6f0fc1a55d2efd43bcefaf88643fbdde4d3c7d7b76a530147827f540
+
+
+    podman images
+
+    >   REPOSITORY                TAG         IMAGE ID      CREATED        SIZE
+    >   localhost/ivoatex-docker  2025.01.23  79aee13a6f0f  5 minutes ago  2.28 GB
+    >   localhost/ivoatex-docker  latest      79aee13a6f0f  5 minutes ago  2.28 GB
+    >   docker.io/library/debian  12.9        30f245ccb05f  10 days ago    121 MB
+
+
+# -----------------------------------------------------
+# Check we can clone a GitHub repository using HTTP.
+# https://github.com/githubtraining/hellogitworld
+#[user@desktop]
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        "localhost/${buildname}:latest"
+
+            git clone https://github.com/ivoa/ivoatex-docker.git
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Check we can access GitHub using ssh.
+# ** This assumes you have a Linux machine with an ssh-agent configured with your ssh private keys.
+# ** On a RedHat box you will also need to fix the SELinux constraints.
+# https://docs.github.com/en/authentication/connecting-to-github-with-ssh/testing-your-ssh-connection
+#[user@desktop]
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        --env "SSH_AUTH_SOCK=/mnt/ssh_auth_sock" \
+        --volume "${SSH_AUTH_SOCK:?}:/mnt/ssh_auth_sock:rw,Z" \
+        "localhost/${buildname}:latest"
+
+            ssh -T git@github.com
+
+    >   Hi Zarquan! You've successfully authenticated, but GitHub does not provide shell access.
+
+
+# -----------------------------------------------------
+# Check we can clone a GitHub repository using ssh.
+# ** This assumes you have a Linux machine with an ssh-agent configured with your ssh private keys.
+# ** On a RedHat box you will also need to fix the SELinux constraints.
+# https://github.com/githubtraining/hellogitworld
+#[user@desktop]
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        --env "SSH_AUTH_SOCK=/mnt/ssh_auth_sock" \
+        --volume "${SSH_AUTH_SOCK:?}:/mnt/ssh_auth_sock:rw,Z" \
+        "localhost/${buildname}:latest"
+
+            git clone git@github.com:ivoa/ivoatex-docker.git
+
+
+    >   Cloning into 'ivoatex-docker'...
+    >   ....
+    >   ....
+    >   Receiving objects: 100% (80/80), 28.78 KiB | 387.00 KiB/s, done.
+    >   Resolving deltas: 100% (27/27), done.
+
+
+# -----------------------------------------------------
+# Check our secret function works.
+#[user@desktop]
+
+    getsecret example.frog
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Login to the Docker registry.
+#[user@desktop]
+
+    guser=$(getsecret 'devops.ghcrio.user')
+    gpass=$(getsecret 'devops.ghcrio.pass')
+
+    echo "${gpass:?}" \
+    | podman login \
+        --password-stdin \
+        --username "${guser:?}" \
+        "${repopath}"
+
+    >   Login Succeeded!
+
+
+# -----------------------------------------------------
+# Push our image to our GitHub repository.
+#[user@desktop]
+
+    podman push \
+        "localhost/${buildname}:${builddate:?}" \
+        "${repopath:?}/${buildname}:${builddate:?}"
+
+    >   Getting image source signatures
+    >   Copying blob 3deb5785aeb8 done   |
+    >   Copying blob 4d2452b0de01 skipped: already exists
+    >   Copying config 79aee13a6f done   |
+    >   Writing manifest to image destination
+
+
+    podman push \
+        "localhost/${buildname}:${builddate:?}" \
+        "${repopath:?}/${buildname}:latest"
+
+    >   Getting image source signatures
+    >   Copying blob f5cea28a1e9d skipped: already exists
+    >   Copying blob 4d2452b0de01 skipped: already exists
+    >   Copying config 79aee13a6f done   |
+    >   Writing manifest to image destination
+
+
+# -----------------------------------------------------
+# -----------------------------------------------------
+# Clear our image cache.
+#[user@desktop]
+
+    podman rmi -f $(podman images -aq)
+
+    >   ....
+    >   ....
+
+# -----------------------------------------------------
+# Test our image.
+#[user@desktop]
+
+    DOC_PATH=...
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        --name ivoatex \
+        --volume "${DOC_PATH}:/document:rw,z" \
+        "${repopath:?}/${buildname}:${builddate:?}"
+
+    >   Trying to pull ghcr.io/ivoa/ivoatex-docker:2025.01.23...
+    >   Getting image source signatures
+    >   Copying blob f5cea28a1e9d done   |
+    >   Copying blob 4d2452b0de01 done   |
+    >   Copying config 79aee13a6f done   |
+    >   Writing manifest to image destination
+
+
+        make clean
+        make
+
+    >   ....
+    >   ....
+    >   Output written on ExecutionBroker.pdf (59 pages, 564425 bytes).
+    >   Transcript written on ExecutionBroker.log.
+    >   Latexmk: Getting log file 'ExecutionBroker.log'
+    >   Latexmk: Examining 'ExecutionBroker.fls'
+    >   Latexmk: Examining 'ExecutionBroker.log'
+    >   Latexmk: Found input bbl file 'ExecutionBroker.bbl'
+    >   Latexmk: Log file says output to 'ExecutionBroker.pdf'
+    >   Latexmk: Found bibliography file(s):
+    >     ./ivoatex/docrepo.bib
+    >     ./ivoatex/ivoabib.bib
+    >   Latexmk: All targets () are up-to-date
+
