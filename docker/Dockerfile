@@ -21,7 +21,7 @@
 
 #
 # Docker container to run the IvoaTex build environment.
-FROM docker.io/library/debian:12.9
+FROM docker.io/library/debian:12.10
 
 ARG builddate
 ARG buildtime
@@ -56,6 +56,7 @@ RUN apt-get update && apt-get -yq install \
     librsvg2-bin \
     nano \
     pdftk \
+    pdf2svg \
     python-is-python3 \
     texlive-latex-extra \
     texlive-bibtex-extra \
