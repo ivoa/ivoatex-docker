@@ -1,0 +1,287 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2025, Manchester (http://www.manchester.ac.uk/)
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+#zrq-notes-indent
+#
+# AIMetrics: []
+#
+
+    Target:
+
+        Success
+
+    Result:
+
+        Work in progress ...
+
+# -----------------------------------------------------
+# Create a new branch.
+#[user@desktop]
+
+    branchname=updates
+
+    source "${HOME:?}/ivoatex-docker.env"
+    pushd "${IVOATEX_CODE}"
+
+        newbranch=$(date '+%Y%m%d')-zrq-${branchname:?}
+
+        git checkout master
+
+        git checkout -b "${newbranch:?}"
+
+    popd
+
+
+# -----------------------------------------------------
+# Update the dependencies.
+#[user@desktop]
+
+    source "${HOME:?}/ivoatex-docker.env"
+    pushd "${IVOATEX_CODE}"
+
+
+        git diff docker/Dockerfile
+
+    popd
+
+    >   diff --git a/docker/Dockerfile b/docker/Dockerfile
+    >   index ba97ff5..61e8a3a 100644
+    >   --- a/docker/Dockerfile
+    >   +++ b/docker/Dockerfile
+    >   @@ -21,7 +21,7 @@
+    >
+    >    #
+    >    # Docker container to run the IvoaTex build environment.
+    >   -FROM docker.io/library/debian:12.9
+    >   +FROM docker.io/library/debian:12.10
+    >
+    >    ARG builddate
+    >    ARG buildtime
+    >   @@ -56,6 +56,7 @@ RUN apt-get update && apt-get -yq install \
+    >        librsvg2-bin \
+    >        nano \
+    >        pdftk \
+    >   +    pdf2svg \
+    >        python-is-python3 \
+    >        texlive-latex-extra \
+    >        texlive-bibtex-extra \
+
+
+# -----------------------------------------------------
+# Set the build date and repository name.
+#[user@desktop]
+
+    repohost="ghcr.io"
+    repobase="ivoa"
+    reponame="ivoatex-docker"
+    repopath="${repohost}/${repobase}"
+
+    buildtag=$(date '+%Y.%m.%d')
+    builddate=$(date '+%Y.%m.%d')
+    buildtime=$(date '+%Y-%m-%dT%H:%M:%S')
+    buildname="ivoatex-docker"
+
+cat << EOF
+
+repohost  [${repohost}]
+repobase  [${repobase}]
+reponame  [${reponame}]
+repopath  [${repopath}]
+
+builddate [${builddate}]
+buildtime [${buildtime}]
+buildname [${buildname}]
+
+EOF
+
+    >   repohost  [ghcr.io]
+    >   repobase  [ivoa]
+    >   reponame  [ivoatex-docker]
+    >   repopath  [ghcr.io/ivoa]
+    >
+    >   builddate [2025.04.01]
+    >   buildtime [2025-04-01T14:56:34]
+    >   buildname [ivoatex-docker]
+
+
+# -----------------------------------------------------
+# Clear our image cache.
+#[user@desktop]
+
+    podman rmi -f $(podman images -aq)
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Build our container.
+#[user@desktop]
+
+    podman build \
+        --build-arg "builddate=${builddate:?}" \
+        --build-arg "buildtime=${buildtime:?}" \
+        --tag "${buildname}:latest" \
+        --tag "${buildname}:${builddate:?}" \
+        docker
+
+    >   ....
+    >   ....
+    >   STEP 19/20: VOLUME  /document
+    >   --> 3d8be3e9982
+    >   STEP 20/20: WORKDIR /document
+    >   COMMIT ivoatex-docker:latest
+    >   --> 5a2eb4ed950
+    >   Successfully tagged localhost/ivoatex-docker:latest
+    >   Successfully tagged localhost/ivoatex-docker:2025.04.01
+    >   5a2eb4ed95023f69d97b4eb8a002dd288a19747d398018d18e82756bc5fef0e3
+
+
+    podman images
+
+    >   REPOSITORY                TAG         IMAGE ID      CREATED        SIZE
+    >   localhost/ivoatex-docker  latest      5a2eb4ed9502  8 minutes ago  2.28 GB
+    >   localhost/ivoatex-docker  2025.04.01  5a2eb4ed9502  8 minutes ago  2.28 GB
+    >   docker.io/library/debian  12.10       d84448199470  2 weeks ago    121 MB
+
+
+
+# -----------------------------------------------------
+# Check our secret function works.
+#[user@desktop]
+
+    getsecret example.frog
+
+    >   ....
+    >   ....
+
+
+# -----------------------------------------------------
+# Login to the Docker registry.
+#[user@desktop]
+
+    guser=$(getsecret 'devops.ghcrio.user')
+    gpass=$(getsecret 'devops.ghcrio.pass')
+
+    echo "${gpass:?}" \
+    | podman login \
+        --password-stdin \
+        --username "${guser:?}" \
+        "${repopath}"
+
+    >   Login Succeeded!
+
+
+# -----------------------------------------------------
+# Push our image to our GitHub repository.
+#[user@desktop]
+
+    podman push \
+        "localhost/${buildname}:${builddate:?}" \
+        "${repopath:?}/${buildname}:${builddate:?}"
+
+    >   Getting image source signatures
+    >   Copying blob 53babe930602 done
+    >   Copying blob 2fc8ec3ad3ca done
+    >   Copying config 5a2eb4ed95 done
+    >   Writing manifest to image destination
+    >   Storing signatures
+
+
+    podman push \
+        "localhost/${buildname}:${builddate:?}" \
+        "${repopath:?}/${buildname}:latest"
+
+    >   Getting image source signatures
+    >   Copying blob 53babe930602 skipped: already exists
+    >   Copying blob 2fc8ec3ad3ca skipped: already exists
+    >   Copying config 5a2eb4ed95 done
+    >   Writing manifest to image destination
+    >   Storing signatures
+
+
+# -----------------------------------------------------
+# -----------------------------------------------------
+# Clear our image cache.
+#[user@desktop]
+
+    podman rmi -f $(podman images -aq)
+
+    >   ....
+    >   ....
+
+# -----------------------------------------------------
+# Test our image.
+#[user@desktop]
+
+
+    pushd $(mktemp -d)
+
+        git clone https://github.com/ivoa-std/ivoatexDoc
+
+    >   ....
+    >   ....
+    >   Receiving objects: 100% (435/435), 187.71 KiB | 3.24 MiB/s, done.
+    >   Resolving deltas: 100% (245/245), done.
+
+        DOC_PATH=$(pwd)/ivoatexDoc
+
+        podman run \
+            --rm \
+            --tty \
+            --interactive \
+            --volume "${DOC_PATH:?}:/document:rw,z" \
+            ghcr.io/ivoa/ivoatex-docker:latest
+
+
+    >   Trying to pull ghcr.io/ivoa/ivoatex-docker:latest...
+    >   Getting image source signatures
+    >   Copying blob cea520b4c4fc done
+    >   Copying blob 74d2300109db done
+    >   Copying config 5a2eb4ed95 done
+    >   Writing manifest to image destination
+    >   Storing signatures
+
+
+        make
+
+    >   *** ivoatex submodule not found.  Initialising submodules.
+    >   
+    >   git submodule update --init
+    >   Submodule 'ivoatex' (https://github.com/ivoa-std/ivoatex) registered for path 'ivoatex'
+    >   Cloning into '/document/ivoatex'...
+    >   Submodule path 'ivoatex': checked out '38565f42e8d6012e77ff347a6cf3030f0ffc0b17'
+    >   ....
+    >   ....
+    >   Output written on ivoatexDoc.pdf (44 pages, 699188 bytes).
+    >   Transcript written on ivoatexDoc.log.
+    >   Latexmk: Getting log file 'ivoatexDoc.log'
+    >   Latexmk: Examining 'ivoatexDoc.fls'
+    >   Latexmk: Examining 'ivoatexDoc.log'
+    >   Latexmk: Found input bbl file 'ivoatexDoc.bbl'
+    >   Latexmk: Log file says output to 'ivoatexDoc.pdf'
+    >   Latexmk: Found bibliography file(s):
+    >     ./ivoatex/docrepo.bib
+    >     ./ivoatex/ivoabib.bib
+    >     ./local.bib
+    >   Latexmk: All targets () are up-to-date
+    >   
+    >   rm hello.tikz.pdf
+
