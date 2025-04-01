@@ -66,12 +66,12 @@
     >   --- a/docker/Dockerfile
     >   +++ b/docker/Dockerfile
     >   @@ -21,7 +21,7 @@
-    >   
+    >
     >    #
     >    # Docker container to run the IvoaTex build environment.
     >   -FROM docker.io/library/debian:12.9
     >   +FROM docker.io/library/debian:12.10
-    >   
+    >
     >    ARG builddate
     >    ARG buildtime
     >   @@ -56,6 +56,7 @@ RUN apt-get update && apt-get -yq install \
@@ -115,7 +115,7 @@ EOF
     >   repobase  [ivoa]
     >   reponame  [ivoatex-docker]
     >   repopath  [ghcr.io/ivoa]
-    >   
+    >
     >   builddate [2025.04.01]
     >   buildtime [2025-04-01T14:56:34]
     >   buildname [ivoatex-docker]
@@ -260,7 +260,7 @@ EOF
     >   Storing signatures
 
 
-        make clean
+        make
 
     >   *** ivoatex submodule not found.  Initialising submodules.
     >   
@@ -268,15 +268,6 @@ EOF
     >   Submodule 'ivoatex' (https://github.com/ivoa-std/ivoatex) registered for path 'ivoatex'
     >   Cloning into '/document/ivoatex'...
     >   Submodule path 'ivoatex': checked out '38565f42e8d6012e77ff347a6cf3030f0ffc0b17'
-    >   rm -f ivoatexDoc.pdf ivoatexDoc.aux ivoatexDoc.log ivoatexDoc.toc texput.log ivoatexmeta.tex
-    >   rm -f ivoatexDoc.html ivoatexDoc.xhtml
-    >   rm -f *.bbl *.blg *.out debug.html *.fls *.fdb_latexmk
-    >   rm -f arxiv-upload.tar.gz
-    >   rm -f hello.tikz.svg
-
-
-        make
-
     >   ....
     >   ....
     >   Output written on ivoatexDoc.pdf (44 pages, 699188 bytes).
@@ -293,5 +284,4 @@ EOF
     >   Latexmk: All targets () are up-to-date
     >   
     >   rm hello.tikz.pdf
-
 
