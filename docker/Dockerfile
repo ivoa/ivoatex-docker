@@ -58,11 +58,17 @@ RUN apt-get update && apt-get -yq install \
     pdftk \
     pdf2svg \
     python-is-python3 \
+    python3-requests \
     texlive-latex-extra \
     texlive-bibtex-extra \
     vim \
+    imagemagick \
     xsltproc \
     zip
+
+# At the time of this writing (25-08-2025), PDF converts were not allowed by default at install time due
+# to old ghostscript vulnerabilities. This might change in the future. The line below overrides this policy.
+RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-*/policy.xml
 
 #
 # Label working directory as a data volume.
